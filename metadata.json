@@ -1,0 +1,6 @@
+{
+  "name": "TOGO SERVE",
+  "description": "Philippine Delivery Marketplace & Autonomous AI Agent Operating System with Human-in-the-Loop Governance.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
