@@ -502,16 +502,328 @@ export const runSimulationScenario = async (
       });
       steps.push('4. Dispatch AI observed zero active riders in zone; generated surge incentive advisory');
 
+      if (context.enqueueAIApproval) {
+        context.enqueueAIApproval({
+          id: `appr_sim_d_${Date.now()}`,
+          agentId: 'agent_dispatch',
+          agentName: 'Dispatch AI Agent',
+          action: 'Approve Pasay Surge Incentive (+₱25/drop)',
+          reason: `Zero available riders in Pasay/Manila Bay zone during rainstorm. Dispatch AI recommends temporary ₱25 surge incentive to draw neighboring Makati riders.`,
+          confidence: 0.91,
+          riskLevel: 'MEDIUM',
+          affectedRecord: `Zone: Pasay / Manila Bay (+₱25)`,
+          timeRequested: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          status: 'PENDING',
+          payload: {
+            zone: 'Pasay/Manila Bay',
+            incentiveAmount: 25,
+            durationMinutes: 45,
+            trigger: 'FLEET_SHORTAGE_RAIN',
+          },
+        });
+      }
+      steps.push('5. Enqueued surge incentive authorization in AI Approval Queue for Human Dispatcher sign-off');
+
       return {
         scenarioId,
         orderId,
         orderNumber,
         stepsExecuted: steps,
         finalOrderStatus: 'SEARCHING_RIDER',
-        eventsEmittedCount: 4,
+        eventsEmittedCount: 5,
         aiDecisionsRecorded: 1,
         settlementsRecorded: false,
-        message: 'Scenario D: Rider shortage observed and surge recommendation logged.',
+        message: 'Scenario D: Rider shortage observed, surge recommendation enqueued for human supervisor.',
+      };
+    }
+
+    case 'SCENARIO_E': {
+      // Customer Changes Delivery Instructions
+      publishPlatformEvent({
+        eventType: 'DISPATCH_REQUESTED',
+        actorType: 'SYSTEM',
+        actorId: 'dispatch_engine',
+        entityType: 'DISPATCH',
+        entityId: `disp_${orderId}`,
+        previousState: 'PREPARING',
+        newState: 'RIDER_ASSIGNED',
+        correlationId: corrId,
+        orderId,
+      });
+
+      publishPlatformEvent({
+        eventType: 'DELIVERY_STARTED',
+        actorType: 'RIDER',
+        actorId: 'rdr_1',
+        entityType: 'DELIVERY',
+        entityId: `del_${orderId}`,
+        previousState: 'READY_FOR_PICKUP',
+        newState: 'IN_DELIVERY',
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('4. Rider picked up order and commenced transit toward recipient address');
+
+      publishPlatformEvent({
+        eventType: 'AI_OBSERVATION_RECORDED',
+        actorType: 'AI_AGENT',
+        actorId: 'agent_support',
+        entityType: 'ORDER',
+        entityId: orderId,
+        metadata: {
+          instructionChange: 'Leave with Tower 2 Concierge, Intercom #1402 is undergoing repair',
+          geoDeviationMeters: 0,
+          riskScore: 'LOW',
+          safetyCheck: 'PASSED',
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('5. Customer updated delivery notes; Support AI verified zero-deviation address safety');
+
+      publishPlatformEvent({
+        eventType: 'AI_RECOMMENDATION_GENERATED',
+        actorType: 'AI_AGENT',
+        actorId: 'agent_support',
+        entityType: 'DELIVERY',
+        entityId: `del_${orderId}`,
+        metadata: {
+          action: 'FORWARD_NOTE_TO_RIDER_APP',
+          urgentNotification: true,
+          note: 'Tower 2 Concierge drop-off authorized',
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('6. Instructions pushed to Rider App heads-up display; Rider acknowledged updated drop instructions');
+
+      return {
+        scenarioId,
+        orderId,
+        orderNumber,
+        stepsExecuted: steps,
+        finalOrderStatus: 'IN_DELIVERY',
+        eventsEmittedCount: 6,
+        aiDecisionsRecorded: 1,
+        settlementsRecorded: false,
+        message: 'Scenario E: Mid-transit instruction update evaluated safely and synced to rider in real time.',
+      };
+    }
+
+    case 'SCENARIO_F': {
+      // Merchant Item Unavailable
+      publishPlatformEvent({
+        eventType: 'AI_OBSERVATION_RECORDED',
+        actorType: 'AI_AGENT',
+        actorId: 'agent_merchant_ops',
+        entityType: 'MERCHANT',
+        entityId: merchant.id,
+        metadata: {
+          stockoutItem: 'Extra Garlic Rice',
+          orderNumber,
+          kitchenAlert: 'Out of stock at Mang Inasal - Manila Bay kitchen station',
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('4. Merchant kitchen flagged stockout for Extra Garlic Rice (₱45.00)');
+
+      publishPlatformEvent({
+        eventType: 'AI_RECOMMENDATION_GENERATED',
+        actorType: 'AI_AGENT',
+        actorId: 'agent_merchant_ops',
+        entityType: 'ORDER',
+        entityId: orderId,
+        metadata: {
+          recommendation: 'MODIFY_ORDER_ITEM_SUBTOTAL',
+          deductAmount: 45,
+          refundMode: 'AUTO_WALLET_REVERSAL',
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('5. Merchant Ops AI recommended automatic ₱45 price adjustment & customer push notification');
+
+      if (context.enqueueAIApproval) {
+        context.enqueueAIApproval({
+          id: `appr_sim_f_${Date.now()}`,
+          agentId: 'agent_merchant_ops',
+          agentName: 'Merchant Operations AI',
+          action: 'Approve Out-of-Stock Order Modification',
+          reason: `Mang Inasal kitchen ran out of Extra Garlic Rice. Auto-adjust order total by -₱45.00 and notify customer before kitchen fires main entrees.`,
+          confidence: 0.96,
+          riskLevel: 'LOW',
+          affectedRecord: `Order #${orderNumber} (-₱45.00)`,
+          timeRequested: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          status: 'PENDING',
+          payload: {
+            orderId,
+            orderNumber,
+            unavailableItem: 'Extra Garlic Rice',
+            refundAmount: 45,
+            revisedSubtotal: 495,
+          },
+        });
+      }
+      steps.push('6. Queued item modification in AI Approval Queue; kitchen proceeds with remaining meal items');
+
+      return {
+        scenarioId,
+        orderId,
+        orderNumber,
+        stepsExecuted: steps,
+        finalOrderStatus: 'PREPARING',
+        eventsEmittedCount: 6,
+        aiDecisionsRecorded: 1,
+        settlementsRecorded: false,
+        message: 'Scenario F: Kitchen stockout caught early, price adjustment queued for supervisor verification.',
+      };
+    }
+
+    case 'SCENARIO_G': {
+      // Delivery Delayed in Heavy Traffic
+      publishPlatformEvent({
+        eventType: 'DELIVERY_STARTED',
+        actorType: 'RIDER',
+        actorId: 'rdr_1',
+        entityType: 'DELIVERY',
+        entityId: `del_${orderId}`,
+        previousState: 'READY_FOR_PICKUP',
+        newState: 'IN_DELIVERY',
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('4. Rider verified pickup and departed via EDSA-Buendia corridor');
+
+      publishPlatformEvent({
+        eventType: 'AI_OBSERVATION_RECORDED',
+        actorType: 'AI_AGENT',
+        actorId: 'agent_dispatch',
+        entityType: 'DELIVERY',
+        entityId: `del_${orderId}`,
+        metadata: {
+          telemetrySpeedKmH: 7.2,
+          congestionIndex: 0.88,
+          corridor: 'EDSA / Ayala Interchange',
+          predictedDelayMins: 18,
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('5. Dispatch AI observed severe gridlock (7 km/h telemetry); computed +18 min transit delay');
+
+      publishPlatformEvent({
+        eventType: 'AI_RECOMMENDATION_GENERATED',
+        actorType: 'AI_AGENT',
+        actorId: 'agent_customer_exp',
+        entityType: 'ORDER',
+        entityId: orderId,
+        metadata: {
+          action: 'UPDATE_DYNAMIC_ETA',
+          oldEtaMins: 15,
+          revisedEtaMins: 33,
+          apologyVoucherCode: 'TRAFFIC10',
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('6. Live tracking ETA updated to 33 mins; Proactive courtesy notification sent to customer');
+
+      return {
+        scenarioId,
+        orderId,
+        orderNumber,
+        stepsExecuted: steps,
+        finalOrderStatus: 'IN_DELIVERY',
+        eventsEmittedCount: 6,
+        aiDecisionsRecorded: 1,
+        settlementsRecorded: false,
+        message: 'Scenario G: Traffic congestion dynamically factored into live customer ETA with proactive messaging.',
+      };
+    }
+
+    case 'SCENARIO_H': {
+      // Customer Reports Missing Item
+      publishPlatformEvent({
+        eventType: 'DELIVERY_COMPLETED',
+        actorType: 'RIDER',
+        actorId: 'rdr_1',
+        entityType: 'DELIVERY',
+        entityId: `del_${orderId}`,
+        previousState: 'DELIVERY_VERIFICATION',
+        newState: 'COMPLETED',
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('4. Order delivered by rider via PIN verification');
+
+      publishPlatformEvent({
+        eventType: 'SUPPORT_TICKET_CREATED',
+        actorType: 'CUSTOMER',
+        actorId: 'cust_sim_01',
+        entityType: 'SUPPORT_TICKET',
+        entityId: `tkt_${orderId}`,
+        metadata: {
+          issue: 'MISSING_ITEM',
+          item: 'Iced Milk Tea Large',
+          itemCost: 85,
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('5. Customer opened support ticket reporting missing beverage: Iced Milk Tea (₱85)');
+
+      publishPlatformEvent({
+        eventType: 'AI_RECOMMENDATION_GENERATED',
+        actorType: 'AI_AGENT',
+        actorId: 'agent_support',
+        entityType: 'SUPPORT_TICKET',
+        entityId: `tkt_${orderId}`,
+        metadata: {
+          action: 'APPROVE_PARTIAL_REFUND_CREDIT',
+          amount: 85,
+          confidence: 0.93,
+          policy: 'SOP-SUP-104',
+          requiresSupervisorReview: true,
+        },
+        correlationId: corrId,
+        orderId,
+      });
+      steps.push('6. Customer Support AI verified kitchen packing checklist & recommended ₱85 refund credit');
+
+      if (context.enqueueAIApproval) {
+        context.enqueueAIApproval({
+          id: `appr_sim_h_${Date.now()}`,
+          agentId: 'agent_support',
+          agentName: 'Customer Support AI Agent',
+          action: 'Authorize Missing Item Partial Credit',
+          reason: `Customer reported missing Iced Milk Tea (₱85.00) in Order #${orderNumber}. Photo verified against receipt. Recommended partial refund.`,
+          confidence: 0.93,
+          riskLevel: 'MEDIUM',
+          affectedRecord: `Order #${orderNumber} (₱85.00 item)`,
+          timeRequested: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          status: 'PENDING',
+          payload: {
+            orderId,
+            orderNumber,
+            item: 'Iced Milk Tea Large',
+            amount: 85,
+            resolution: 'PARTIAL_REFUND_CREDIT',
+          },
+        });
+      }
+      steps.push('7. Enqueued partial credit authorization in AI Approval Queue for supervisor sign-off');
+
+      return {
+        scenarioId,
+        orderId,
+        orderNumber,
+        stepsExecuted: steps,
+        finalOrderStatus: 'PARTIALLY_REFUNDED',
+        eventsEmittedCount: 7,
+        aiDecisionsRecorded: 1,
+        settlementsRecorded: false,
+        message: 'Scenario H: Missing item ticket triaged by Support AI and enqueued for partial refund.',
       };
     }
 
@@ -547,13 +859,35 @@ export const runSimulationScenario = async (
       });
       steps.push('5. COD Audit AI flagged remittance discrepancy for human financial supervisor sign-off');
 
+      if (context.enqueueAIApproval) {
+        context.enqueueAIApproval({
+          id: `appr_sim_i_${Date.now()}`,
+          agentId: 'agent_finance',
+          agentName: 'COD Reconciliation & Audit AI',
+          action: 'Approve ₱40 COD Shortage Adjustment',
+          reason: `Rider remitted ₱500 against ₱540 expected COD for Order #${orderNumber}. Customer was short ₱40 change; rider logged ticket. Approve adjustment to merchant escrow.`,
+          confidence: 0.88,
+          riskLevel: 'MEDIUM',
+          affectedRecord: `Order #${orderNumber} (₱40.00 variance)`,
+          timeRequested: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          status: 'PENDING',
+          payload: {
+            orderId,
+            orderNumber,
+            discrepancy: -40,
+            recommendedResolution: 'DEBIT_CUSTOMER_WALLET_CREDIT_ESCROW',
+          },
+        });
+      }
+      steps.push('6. Enqueued COD variance audit in AI Approval Queue for Finance Supervisor sign-off');
+
       return {
         scenarioId,
         orderId,
         orderNumber,
         stepsExecuted: steps,
         finalOrderStatus: 'DISPUTED',
-        eventsEmittedCount: 5,
+        eventsEmittedCount: 6,
         aiDecisionsRecorded: 1,
         settlementsRecorded: false,
         message: 'Scenario I: COD discrepancy observed, logged, and routed to human review.',
@@ -594,13 +928,37 @@ export const runSimulationScenario = async (
       });
       steps.push('5. Refund Policy AI evaluated photo proof; recommended ₱540 refund for Human Supervisor approval (enqueued)');
 
+      if (context.enqueueAIApproval) {
+        context.enqueueAIApproval({
+          id: `appr_sim_j_${Date.now()}`,
+          agentId: 'agent_refund',
+          agentName: 'Refund & Dispute AI Agent',
+          action: 'Approve Spilled Food Full Refund',
+          reason: `Customer submitted photo of spilled sinigang during transit (Order #${orderNumber}). Evaluated under SOP-REF-202. Full refund of ₱540 recommended.`,
+          confidence: 0.94,
+          riskLevel: 'HIGH',
+          affectedRecord: `Order #${orderNumber} (₱540.00)`,
+          timeRequested: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          status: 'PENDING',
+          payload: {
+            orderId,
+            orderNumber,
+            amount: 540,
+            reason: 'SPILLED_SOUP_IN_TRANSIT',
+            policyRef: 'SOP-REF-202',
+            method: 'ORIGINAL_PAYMENT_METHOD',
+          },
+        });
+      }
+      steps.push('6. High-Risk refund item enqueued into AI Approval Queue with full policy citations');
+
       return {
         scenarioId,
         orderId,
         orderNumber,
         stepsExecuted: steps,
         finalOrderStatus: 'REFUND_REQUESTED',
-        eventsEmittedCount: 5,
+        eventsEmittedCount: 6,
         aiDecisionsRecorded: 1,
         settlementsRecorded: false,
         message: 'Scenario J: Refund evaluated under Human-in-the-Loop policy and enqueued.',

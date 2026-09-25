@@ -301,3 +301,15 @@ export interface SimulationScenario {
   stepsCount: number;
   tags: string[];
 }
+
+export interface SimulationResult {
+  scenarioId: SimulationScenarioId;
+  orderId: string;
+  orderNumber: string;
+  stepsExecuted: string[];
+  finalOrderStatus: string;
+  eventsEmittedCount: number;
+  aiDecisionsRecorded: number;
+  settlementsRecorded: boolean;
+  message: string;
+}
