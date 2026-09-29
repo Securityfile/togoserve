@@ -69,6 +69,8 @@ export const getAllPlatformEvents = (): PlatformEvent[] => {
   return [...eventStore];
 };
 
+export const getPlatformEvents = getAllPlatformEvents;
+
 export const getEventsForOrder = (orderId: string): PlatformEvent[] => {
   return eventStore
     .filter((e) => e.orderId === orderId || e.entityId === orderId)
