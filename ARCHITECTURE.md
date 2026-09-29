@@ -1,7 +1,17 @@
 # ToGoServe Architecture Specification
-**Version:** 1.0.0 (Master Directive Compliant)  
-**Status:** Baseline Active  
+**Version:** 1.1.0 (Master Directive Compliant)  
+**System Environment:** `DEVELOPMENT / ARCHITECTURAL BASELINE`  
 **System Classification:** AI-Native Commerce, Logistics & Multi-Agent Operating Platform  
+
+---
+
+## Technical Environment Status Definition
+
+To prevent misleading claims of external readiness, system capabilities are classified under four rigorous engineering tiers:
+- **UI FUNCTIONALITY:** Front-end interactive views, component layouts, and responsive interfaces rendered with domain data.
+- **DEVELOPMENT FUNCTIONALITY:** Local in-memory state, deterministic domain engines, event journals (`PlatformEvent`), and simulation kernels operating in-browser/in-runtime.
+- **INTEGRATED FUNCTIONALITY:** Standardized API contracts, server middleware, and adapter interfaces prepared for live provider binding.
+- **PRODUCTION-READY FUNCTIONALITY:** High-availability cloud databases, real BSP-regulated financial escrow movement, live telematics satellite feeds, and formal third-party regulatory certification. **(Currently in DEVELOPMENT BASELINE stage; not yet production-certified).**
 
 ---
 

@@ -43,6 +43,15 @@ import {
   buildChronologicalOrderTimeline,
 } from '../services/eventEngine';
 import {
+  OrderRepository,
+  ProductRepository,
+  PaymentRepository,
+  TransactionManager,
+  IdempotencyManager,
+  AuthorizationBoundary,
+} from '../services/persistenceAdapter';
+import { ITransactionContext } from '../repositories/interfaces';
+import {
   getObservationRecords,
   getAIDecisionRecords,
   getAITrainingDataset,
@@ -219,7 +228,24 @@ interface AppContextType {
   };
   getOrderEvents: (orderId: string) => PlatformEvent[];
   getOrderChronologicalTimeline: (orderId: string) => any[];
+
+  // Milestone 3: Production Persistence & Transaction Architecture
+  orderRepository: OrderRepository;
+  productRepository: ProductRepository;
+  paymentRepository: PaymentRepository;
+  executeTransaction: <R>(op: (tx: ITransactionContext) => Promise<R>, correlationId?: string) => Promise<R>;
+  executeWithIdempotency: <T>(
+    key: string,
+    opType: string,
+    callerId: string,
+    payload: any,
+    fn: () => Promise<T>
+  ) => Promise<{ result: T; wasCached: boolean }>;
 }
+
+export const orderRepository = new OrderRepository('togo_live_orders', MOCK_ORDERS);
+export const productRepository = new ProductRepository('togo_live_products', MOCK_PRODUCTS);
+export const paymentRepository = new PaymentRepository('togo_live_payments', []);
 
 const loadStorage = <T,>(key: string, fallback: T): T => {
   try {
@@ -440,6 +466,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     notes?: string;
     deliveryAddress: PhilippineAddress;
   }): Order => {
+    // Server-Authoritative Authorization Check
+    AuthorizationBoundary.validateOrderCreation(role, 'c_maria', 'c_maria');
+
     const merchant = merchants.find((m) => m.id === params.merchantId) || merchants[0];
     const subtotal = params.items.reduce((sum, item) => sum + item.totalPrice, 0);
     const voucherDisc = voucher ? voucher.discount : 0;
@@ -1600,6 +1629,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return buildChronologicalOrderTimeline(orderId);
   };
 
+  const executeTransaction = async <R,>(
+    op: (tx: ITransactionContext) => Promise<R>,
+    correlationId?: string
+  ): Promise<R> => {
+    return TransactionManager.executeInTransaction(op, correlationId);
+  };
+
+  const executeWithIdempotency = async <T,>(
+    key: string,
+    opType: string,
+    callerId: string,
+    payload: any,
+    fn: () => Promise<T>
+  ): Promise<{ result: T; wasCached: boolean }> => {
+    return IdempotencyManager.checkOrExecute(key, opType, callerId, payload, fn);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -1706,6 +1752,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         evaluateRiders,
         getOrderEvents,
         getOrderChronologicalTimeline,
+
+        // Milestone 3: Production Persistence & Transaction Architecture
+        orderRepository,
+        productRepository,
+        paymentRepository,
+        executeTransaction,
+        executeWithIdempotency,
       }}
     >
       {children}

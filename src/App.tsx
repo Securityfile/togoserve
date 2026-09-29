@@ -1,7 +1,10 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
+import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/common/Header';
 import { AIAssistantModal } from './components/common/AIAssistantModal';
+import { AuthModal } from './components/auth/AuthModal';
+import { RealtimeListener } from './components/common/RealtimeListener';
 import { CustomerApp } from './components/customer/CustomerApp';
 import { MerchantPortal } from './components/merchant/MerchantPortal';
 import { RiderApp } from './components/rider/RiderApp';
@@ -21,8 +24,10 @@ const MainContent: React.FC = () => {
         {role === 'admin' && <AdminPortal />}
       </div>
 
-      {/* Global Overlays */}
+      {/* Global Overlays & Modals */}
       <AIAssistantModal />
+      <AuthModal />
+      <RealtimeListener />
 
       {/* Modern Philippine Brand Footer */}
       <footer className="bg-slate-950 text-slate-400 text-xs py-8 border-t border-slate-800">
@@ -42,11 +47,11 @@ const MainContent: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-[11px]">
-            <span>Supported Payments: GCash • Maya • QRPh • Cash on Delivery</span>
+            <span>Payments: GCash • Maya • QRPh • COD</span>
             <span>•</span>
-            <span>BSP Regulated Payment Security</span>
+            <span>BSP Escrow: Sandbox (Direct Direct-Settle Pending)</span>
             <span>•</span>
-            <span className="text-emerald-400 font-semibold">Live Production Operational</span>
+            <span className="text-emerald-400 font-semibold">SQLite WAL Persistence Active</span>
           </div>
         </div>
       </footer>
@@ -56,8 +61,10 @@ const MainContent: React.FC = () => {
 
 export default function App() {
   return (
-    <AppProvider>
-      <MainContent />
-    </AppProvider>
+    <AuthProvider>
+      <AppProvider>
+        <MainContent />
+      </AppProvider>
+    </AuthProvider>
   );
 }

@@ -63,6 +63,13 @@ export const CustomerHome: React.FC<CustomerHomeProps> = ({
   const filteredMerchants = merchants.filter((m) => {
     const matchesCategory =
       activeCategory === 'all' ||
+      (activeCategory === 'food' && (m.category === 'Restaurants' || m.category === 'Coffee & Milk Tea')) ||
+      (activeCategory === 'groceries' && m.category === 'Groceries') ||
+      (activeCategory === 'convenience' && m.category === 'Convenience') ||
+      (activeCategory === 'pharmacy' && m.category === 'Pharmacy') ||
+      (activeCategory === 'retail' && m.category === 'Retail') ||
+      (activeCategory === 'flowers' && m.category === 'Flowers') ||
+      (activeCategory === 'pets' && (m.category === 'Pet Care' || m.category === 'Pet Supplies')) ||
       m.category.toLowerCase() === activeCategory.toLowerCase();
 
     const matchesSearch =

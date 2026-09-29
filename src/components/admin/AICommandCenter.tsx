@@ -242,6 +242,9 @@ export const AICommandCenter: React.FC = () => {
                 >
                   {aiSafetyControls.masterAutomationPaused ? 'ALL AUTOMATION PAUSED' : 'ACTIVE • HUMAN OVERSIGHT'}
                 </span>
+                <span className="text-[11px] font-semibold bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full border border-blue-500/40">
+                  DEVELOPMENT / ARCHITECTURAL BASELINE
+                </span>
                 <span className="text-[11px] font-semibold bg-slate-800 text-slate-300 px-2.5 py-0.5 rounded-full border border-slate-700">
                   Dev Mode Capped at Level 3
                 </span>
@@ -250,9 +253,8 @@ export const AICommandCenter: React.FC = () => {
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">
-                Operating Philosophy: <strong>OBSERVE → RECOMMEND → APPROVE → EXECUTE → MEASURE → LEARN</strong>.
-                High-risk actions (fund transfers, payouts, pricing overrides, account deletions) are blocked by the
-                hardened safety policy engine.
+                Environment: <strong>DEVELOPMENT FUNCTIONALITY & ARCHITECTURAL BASELINE</strong> (Safe local execution; real money movement & live production GPS decoupled behind integration adapters).
+                Philosophy: <strong>OBSERVE → RECOMMEND → APPROVE → EXECUTE → MEASURE → LEARN</strong>.
               </p>
             </div>
           </div>

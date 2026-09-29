@@ -1,9 +1,9 @@
 # TOGOSERVE
 ### AI-Native Commerce, Logistics & Multi-Agent Operating Platform
-**Metro Manila, Philippines • Version 1.0.0**
+**Metro Manila, Philippines • Version 1.0.0**  
+**Environment Status:** `DEVELOPMENT / ARCHITECTURAL BASELINE`  
 
-[![Build & Deploy](https://github.com/securityfile/togoserve/actions/workflows/deploy.yml/badge.svg)](https://github.com/securityfile/togoserve/actions/workflows/deploy.yml)
-[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-blue.svg)](LICENSE)
+> **Technical Notice:** The platform currently operates in a local architectural and development baseline. UI components, state machines, simulation kernels, and event journals are fully operational. Live external production integrations (real BSP money settlement, cellular GNSS hardware, certified commercial fleets) are represented through safe integration boundary adapters and will be connected in scheduled roadmap phases.
 
 ---
 

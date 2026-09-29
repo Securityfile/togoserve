@@ -1,3 +1,5 @@
+import { MultiCategoryAttributes } from './categoryCommerce';
+
 export type UserRole = 'customer' | 'merchant' | 'rider' | 'admin';
 
 export interface PhilippineAddress {
@@ -78,6 +80,7 @@ export interface Product {
   lowStockThreshold: number;
   costPrice: number;
   options?: ProductOption[];
+  categoryAttributes?: MultiCategoryAttributes;
 }
 
 export interface OrderItem {
@@ -161,6 +164,8 @@ export interface Merchant {
     | 'Retail'
     | 'Flowers'
     | 'Pet Supplies'
+    | 'Pet Care'
+    | 'TOGO Padala'
     | 'Coffee & Milk Tea';
   cuisine?: string;
   rating: number;
@@ -315,3 +320,5 @@ export interface PackageDeliveryRequest {
 
 export * from './aiOs';
 export * from './orderEngine';
+export * from './categoryCommerce';
+export * from './padalaEngine';
