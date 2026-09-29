@@ -354,8 +354,8 @@ export const RiderApp: React.FC = () => {
                       <KeyRound className="w-4 h-4 text-emerald-400" />
                       <span>Ask Customer for 4-Digit Delivery PIN</span>
                     </label>
-                    <span className="text-[10px] text-slate-500 font-mono">
-                      (Demo PIN: {assignedOrder.deliveryPin})
+                    <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/40">
+                      Customer Handshake OTP
                     </span>
                   </div>
 

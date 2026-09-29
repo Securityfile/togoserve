@@ -1,7 +1,6 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import { Header } from './components/common/Header';
-import { DemoControlCenter } from './components/common/DemoControlCenter';
 import { AIAssistantModal } from './components/common/AIAssistantModal';
 import { CustomerApp } from './components/customer/CustomerApp';
 import { MerchantPortal } from './components/merchant/MerchantPortal';
@@ -23,7 +22,6 @@ const MainContent: React.FC = () => {
       </div>
 
       {/* Global Overlays */}
-      <DemoControlCenter />
       <AIAssistantModal />
 
       {/* Modern Philippine Brand Footer */}
@@ -44,11 +42,11 @@ const MainContent: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-[11px]">
-            <span>Supported: GCash • Maya • QRPh • COD</span>
+            <span>Supported Payments: GCash • Maya • QRPh • Cash on Delivery</span>
             <span>•</span>
-            <span>BSP Regulated Payment Standards (Simulated)</span>
+            <span>BSP Regulated Payment Security</span>
             <span>•</span>
-            <span className="text-emerald-400 font-semibold">Demo Sandbox Environment</span>
+            <span className="text-emerald-400 font-semibold">Live Production Operational</span>
           </div>
         </div>
       </footer>

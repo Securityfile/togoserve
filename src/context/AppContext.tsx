@@ -221,29 +221,64 @@ interface AppContextType {
   getOrderChronologicalTimeline: (orderId: string) => any[];
 }
 
+const loadStorage = <T,>(key: string, fallback: T): T => {
+  try {
+    if (typeof window === 'undefined') return fallback;
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const saveStorage = (key: string, value: any) => {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  } catch {
+    // Ignore quota or private browsing errors
+  }
+};
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [role, setRole] = useState<UserRole>('customer');
-  const [selectedAddress, setSelectedAddress] = useState<PhilippineAddress>(INITIAL_ADDRESS);
-  const [cart, setCart] = useState<OrderItem[]>([]);
+  const [role, setRole] = useState<UserRole>(() => loadStorage('togo_live_role', 'customer'));
+  const [selectedAddress, setSelectedAddress] = useState<PhilippineAddress>(() => loadStorage('togo_live_address', INITIAL_ADDRESS));
+  const [cart, setCart] = useState<OrderItem[]>(() => loadStorage('togo_live_cart', []));
   const [voucher, setVoucher] = useState<{ code: string; discount: number } | null>(null);
   const [deliveryTip, setDeliveryTip] = useState<number>(30);
   const [deliveryType, setDeliveryType] = useState<'delivery' | 'pickup'>('delivery');
-  const [customerWalletBalance, setCustomerWalletBalance] = useState<number>(2500);
-  const [isTogoServePlusMember, setIsTogoServePlusMember] = useState<boolean>(true);
-  const [savedFavorites, setSavedFavorites] = useState<string[]>(['m1', 'm2']);
+  const [customerWalletBalance, setCustomerWalletBalance] = useState<number>(() => loadStorage('togo_live_cust_wallet', 2500));
+  const [isTogoServePlusMember, setIsTogoServePlusMember] = useState<boolean>(() => loadStorage('togo_live_plus_member', true));
+  const [savedFavorites, setSavedFavorites] = useState<string[]>(() => loadStorage('togo_live_favorites', ['m1', 'm2']));
 
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
+  const [orders, setOrders] = useState<Order[]>(() => loadStorage('togo_live_orders', MOCK_ORDERS));
   const [activeMerchantId, setActiveMerchantId] = useState<string>('m1');
-  const [merchants, setMerchants] = useState<Merchant[]>(MOCK_MERCHANTS);
-  const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
-  const [riderProfile, setRiderProfile] = useState<RiderProfile>(MOCK_RIDER);
+  const [merchants, setMerchants] = useState<Merchant[]>(() => loadStorage('togo_live_merchants', MOCK_MERCHANTS));
+  const [products, setProducts] = useState<Product[]>(() => loadStorage('togo_live_products', MOCK_PRODUCTS));
+  const [riderProfile, setRiderProfile] = useState<RiderProfile>(() => loadStorage('togo_live_rider', MOCK_RIDER));
   const [activeDeliveryOffer, setActiveDeliveryOffer] = useState<DeliveryOffer | null>(null);
-  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>(MOCK_DELIVERY_ZONES);
-  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(MOCK_SUPPORT_TICKETS);
-  const [codRecords, setCodRecords] = useState<CODReconciliationRecord[]>(MOCK_COD_RECORDS);
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>(() => loadStorage('togo_live_zones', MOCK_DELIVERY_ZONES));
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>(() => loadStorage('togo_live_tickets', MOCK_SUPPORT_TICKETS));
+  const [codRecords, setCodRecords] = useState<CODReconciliationRecord[]>(() => loadStorage('togo_live_cod', MOCK_COD_RECORDS));
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(MOCK_AUDIT_LOGS);
+
+  // Sync state to local storage for persistent live operations
+  useEffect(() => saveStorage('togo_live_role', role), [role]);
+  useEffect(() => saveStorage('togo_live_address', selectedAddress), [selectedAddress]);
+  useEffect(() => saveStorage('togo_live_cart', cart), [cart]);
+  useEffect(() => saveStorage('togo_live_cust_wallet', customerWalletBalance), [customerWalletBalance]);
+  useEffect(() => saveStorage('togo_live_plus_member', isTogoServePlusMember), [isTogoServePlusMember]);
+  useEffect(() => saveStorage('togo_live_favorites', savedFavorites), [savedFavorites]);
+  useEffect(() => saveStorage('togo_live_orders', orders), [orders]);
+  useEffect(() => saveStorage('togo_live_merchants', merchants), [merchants]);
+  useEffect(() => saveStorage('togo_live_products', products), [products]);
+  useEffect(() => saveStorage('togo_live_rider', riderProfile), [riderProfile]);
+  useEffect(() => saveStorage('togo_live_zones', deliveryZones), [deliveryZones]);
+  useEffect(() => saveStorage('togo_live_tickets', supportTickets), [supportTickets]);
+  useEffect(() => saveStorage('togo_live_cod', codRecords), [codRecords]);
 
   // Event Engine & AI Observation Layer State
   const [platformEvents, setPlatformEvents] = useState<PlatformEvent[]>([]);

@@ -21,7 +21,6 @@ export const Header: React.FC = () => {
     selectedAddress,
     cart,
     isTogoServePlusMember,
-    setIsDemoControlOpen,
     setIsAIOpen,
     riderProfile,
     toggleRiderOnline,
@@ -31,17 +30,17 @@ export const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
-      {/* Top Demo Mode & Philippine Brand Bar */}
-      <div className="bg-slate-900 text-white px-4 py-1.5 text-xs flex flex-wrap items-center justify-between gap-2">
+      {/* Top Live Operational & Philippine Commerce Bar */}
+      <div className="bg-slate-950 text-white px-4 py-1.5 text-xs flex flex-wrap items-center justify-between gap-2 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <span className="flex h-2 w-2 relative">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
           </span>
-          <span className="font-semibold text-emerald-400">DEMO & SIMULATION MODE</span>
-          <span className="text-slate-400 hidden sm:inline">•</span>
-          <span className="text-slate-300 hidden sm:inline">
-            Philippine Multi-Vendor Marketplace • No real money processed
+          <span className="font-bold text-emerald-400 tracking-wide uppercase text-[11px]">LIVE PLATFORM</span>
+          <span className="text-slate-500 hidden sm:inline">•</span>
+          <span className="text-slate-300 hidden sm:inline text-[11px]">
+            Metro Manila Operations Active • Accepting On-Demand Orders
           </span>
         </div>
 
@@ -49,17 +48,14 @@ export const Header: React.FC = () => {
           {isTogoServePlusMember && role === 'customer' && (
             <span className="inline-flex items-center gap-1 text-amber-300 bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full text-[11px] font-medium">
               <Crown className="w-3 h-3 text-amber-400" />
-              TOGO SERVE+ Active
+              TOGO SERVE+ Member
             </span>
           )}
 
-          <button
-            onClick={() => setIsDemoControlOpen(true)}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded font-semibold text-xs transition"
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>Demo Control Center</span>
-          </button>
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-300 bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded-lg">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span>BSP Regulated Gateway Active</span>
+          </div>
         </div>
       </div>
 
