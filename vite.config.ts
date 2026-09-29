@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => {
   return {
-    base: process.env.GITHUB_ACTIONS || mode === 'production' ? '/togoserve/' : '/',
+    base: '/',
 
     plugins: [
       react(),
