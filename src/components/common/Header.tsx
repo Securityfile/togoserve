@@ -18,7 +18,12 @@ import {
   LogIn,
 } from 'lucide-react';
 
-export const Header: React.FC = () => {
+interface HeaderProps {
+  onLogout?: () => void;
+  onSelectRole?: (role: UserRole) => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({ onLogout, onSelectRole }) => {
   const {
     role,
     setRole,
@@ -31,6 +36,22 @@ export const Header: React.FC = () => {
   } = useApp();
 
   const { user, logout, setIsAuthModalOpen, setAuthModalMode } = useAuth();
+
+  const handleRoleClick = (newRole: UserRole) => {
+    if (onSelectRole) {
+      onSelectRole(newRole);
+    } else {
+      setRole(newRole);
+    }
+  };
+
+  const handleLogoutClick = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      logout();
+    }
+  };
 
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -104,7 +125,7 @@ export const Header: React.FC = () => {
         {/* Center: Environment / Role Switcher Tabs */}
         <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
           <button
-            onClick={() => setRole('customer')}
+            onClick={() => handleRoleClick('customer')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
               role === 'customer'
                 ? 'bg-white text-emerald-700 shadow-xs font-semibold'
@@ -116,7 +137,7 @@ export const Header: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setRole('merchant')}
+            onClick={() => handleRoleClick('merchant')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
               role === 'merchant'
                 ? 'bg-white text-emerald-700 shadow-xs font-semibold'
@@ -128,7 +149,7 @@ export const Header: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setRole('rider')}
+            onClick={() => handleRoleClick('rider')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
               role === 'rider'
                 ? 'bg-white text-emerald-700 shadow-xs font-semibold'
@@ -140,7 +161,7 @@ export const Header: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setRole('admin')}
+            onClick={() => handleRoleClick('admin')}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
               role === 'admin'
                 ? 'bg-white text-emerald-700 shadow-xs font-semibold'
@@ -164,44 +185,14 @@ export const Header: React.FC = () => {
           </button>
 
           {/* User Account / Auth Status */}
-          {user ? (
-            <div className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1 rounded-xl border border-slate-200 transition text-xs">
-              <button
-                onClick={() => {
-                  setAuthModalMode('login');
-                  setIsAuthModalOpen(true);
-                }}
-                className="flex items-center gap-1.5 text-slate-800 font-semibold"
-                title="Switch persona or manage account"
-              >
-                <div className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">
-                  {user.fullName.charAt(0)}
-                </div>
-                <span className="max-w-[100px] truncate hidden md:inline">{user.fullName.split(' ')[0]}</span>
-                <span className="text-[10px] text-emerald-700 bg-emerald-100 px-1 py-0.2 rounded font-medium uppercase">
-                  {user.role}
-                </span>
-              </button>
-              <button
-                onClick={logout}
-                className="p-1 hover:text-rose-600 text-slate-400 transition"
-                title="Sign Out"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => {
-                setAuthModalMode('login');
-                setIsAuthModalOpen(true);
-              }}
-              className="flex items-center gap-1 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-300 transition"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Sign In</span>
-            </button>
-          )}
+          <button
+            onClick={handleLogoutClick}
+            className="flex items-center gap-1 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl border border-rose-200 transition"
+            title="Log Out of Demo Session"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
+          </button>
 
           {/* Role specific quick action */}
           {role === 'rider' && (
